@@ -7,11 +7,11 @@
  The code makes use of some utilities that are in a small library that I am
  building in order to handle STL files. Treat this as a "pre-release" then.
 
-  Ioannis Nompelis <nompelis@nobelware.com>   Last modified: 20180421
+  Ioannis Nompelis <nompelis@nobelware.com>   Last modified: 20210129
  ***************************************************************************/
 
 /******************************************************************************
- Copyright (c) 2013-2018, Ioannis Nompelis
+ Copyright (c) 2013-2021, Ioannis Nompelis
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without any
@@ -57,7 +57,7 @@
 
 
 
-int read_file( int *nn, int *ne, int **icon, double **x )
+int read_file( char *filename, int *nn, int *ne, int **icon, double **x )
 {
    FILE *fp;
    char data[100];
@@ -67,7 +67,7 @@ int read_file( int *nn, int *ne, int **icon, double **x )
    int i1,i2,i3,i4;
 
 
-   fp = fopen("waverider.dat", "r");
+   fp = fopen(filename, "r");
 
    fgets(data, 100, fp);
    printf("%s", data);
@@ -91,24 +91,37 @@ int read_file( int *nn, int *ne, int **icon, double **x )
    fgets(data, 100, fp);
    printf("%s", data);
 
+   printf("Reading nodes \n");
    for(n=0;n<(*nn);++n) {
+      int cnt;
       fgets(data, 100, fp);
-      sscanf(data, "%lf %lf %lf\n",&xx,&yy,&zz);
+      cnt = sscanf(data, "%lf %lf %lf\n",&xx,&yy,&zz);
+      if( cnt < 3 ) {
+         printf("Error parsing node coefficients \n");
+         exit(1);
+      }
    // printf("%lf %lf %lf \n",xx,yy,zz);
       (*x)[3*n+0] = xx;
       (*x)[3*n+1] = yy;
       (*x)[3*n+2] = zz;
    }
 
+   printf("Reading connectivity \n");
    for(n=0;n<(*ne);++n) {
+      int cnt;
       fgets(data, 100, fp);
-      sscanf(data, "%d %d %d %d\n", &i1,&i2,&i3,&i4);
+      cnt = sscanf(data, "%d %d %d %d\n", &i1,&i2,&i3,&i4);
+      if( cnt < 4 ) {
+         printf("Error parsing connectivity \n");
+         exit(1);
+      }
    // printf("%d %d %d %d \n",i1,i2,i3,i4);
       (*icon)[4*n+0] = i1;
       (*icon)[4*n+1] = i2;
       (*icon)[4*n+2] = i3;
       (*icon)[4*n+3] = i4;
    }
+   printf("Done \n");
 
    fclose(fp);
 
@@ -125,30 +138,37 @@ int main( int argc, char *argv[] )
    int n,m;
 
 
-   (void) read_file( &nn, &ne, &icon, &x );
+   if( argc < 2 ) {
+      printf(" Supply a filename \n");
+      exit(1);
+   }
+
+   (void) read_file( argv[1], &nn, &ne, &icon, &x );
 
    sf = (struct my_STLfile *) malloc(sizeof(struct my_STLfile));
 
    sf->ntri = 2*ne;
    sf-> triangles = (struct my_STLtri *)
-              malloc(((size_t) ne)*sizeof(struct my_STLtri));
+              malloc(((size_t) ne*2)*sizeof(struct my_STLtri));
 
    for(m=0;m<ne;++m) {
       int mm = m*2;
       double xx,yy,zz;
 
-
       n = m*4+0;
+      n = icon[n]-1;
       sf->triangles[mm].vertex1[0] = x[ 3*n+0 ];
       sf->triangles[mm].vertex1[1] = x[ 3*n+1 ];
       sf->triangles[mm].vertex1[2] = x[ 3*n+2 ];
 
       n = m*4+1;
+      n = icon[n]-1;
       sf->triangles[mm].vertex2[0] = x[ 3*n+0 ];
       sf->triangles[mm].vertex2[1] = x[ 3*n+1 ];
       sf->triangles[mm].vertex2[2] = x[ 3*n+2 ];
 
       n = m*4+3;
+      n = icon[n]-1;
       sf->triangles[mm].vertex3[0] = x[ 3*n+0 ];
       sf->triangles[mm].vertex3[1] = x[ 3*n+1 ];
       sf->triangles[mm].vertex3[2] = x[ 3*n+2 ];
@@ -161,16 +181,19 @@ int main( int argc, char *argv[] )
       mm += 1;
 
       n = m*4+2;
+      n = icon[n]-1;
       sf->triangles[mm].vertex1[0] = x[ 3*n+0 ];
       sf->triangles[mm].vertex1[1] = x[ 3*n+1 ];
       sf->triangles[mm].vertex1[2] = x[ 3*n+2 ];
 
       n = m*4+1;
+      n = icon[n]-1;
       sf->triangles[mm].vertex2[0] = x[ 3*n+0 ];
       sf->triangles[mm].vertex2[1] = x[ 3*n+1 ];
       sf->triangles[mm].vertex2[2] = x[ 3*n+2 ];
 
       n = m*4+3;
+      n = icon[n]-1;
       sf->triangles[mm].vertex3[0] = x[ 3*n+0 ];
       sf->triangles[mm].vertex3[1] = x[ 3*n+1 ];
       sf->triangles[mm].vertex3[2] = x[ 3*n+2 ];
@@ -181,8 +204,9 @@ int main( int argc, char *argv[] )
       sf->triangles[mm].normal[2] = 0.0;
    }
 
-
-   (void) inSTL_DumpAsciiSTL("waverider.stl", sf);
+   printf(" Writing file \n");
+   (void) inSTL_DumpAsciiSTL("file.stl", sf);
+   printf(" All done \n");
 
    return(0);
 }

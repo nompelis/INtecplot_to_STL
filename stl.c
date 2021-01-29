@@ -4,11 +4,11 @@
  *  http://en.wikipedia.org/wiki/STL_(file_format)                       *
  *                                                                       *
  *  Ioannis Nompelis <nompelis@nobelware.com>         Created: 20130604  *
- *  Ioannis Nompelis <nompelis@nobelware.com>   Last modified: 20180420  *
+ *  Ioannis Nompelis <nompelis@nobelware.com>   Last modified: 20210129  *
  *************************************************************************/
 
 /******************************************************************************
- Copyright (c) 2013-2018, Ioannis Nompelis
+ Copyright (c) 2013-2021, Ioannis Nompelis
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without any
@@ -372,10 +372,8 @@ int inSTL_DumpAsciiSTL(char *filename, struct my_STLfile *sp)
       fprintf(stderr," i [%s]  Writing file: \"%s\"\n",FUNC,filename);
    }
 
-   fprintf(fp,"solid ASCII_STL_by_IN \n");
+   fprintf(fp,"solid ASCII_STL_by_IN (%d triangles) \n",sp->ntri);
    for(n=0;n<sp->ntri;++n) {
-
-
       fprintf(fp,"  facet normal   %f  %f  %f \n",
            sp->triangles[n].normal[0],
            sp->triangles[n].normal[1],
