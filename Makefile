@@ -16,7 +16,7 @@ all: test
 
 test:
 	$(CC) $(COPTS) -c stl.c 
-	$(CC) $(COPTS) main.c stl.o
+	$(CC) $(COPTS) main.c stl.o -lm
 
 clean:
 	rm -f *.o a.out *.so 

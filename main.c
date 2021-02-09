@@ -153,7 +153,7 @@ int main( int argc, char *argv[] )
 
    for(m=0;m<ne;++m) {
       int mm = m*2;
-      double xx,yy,zz;
+      double dx1[3],dx2[3],dx[3],dd;
 
       n = m*4+0;
       n = icon[n]-1;
@@ -174,13 +174,23 @@ int main( int argc, char *argv[] )
       sf->triangles[mm].vertex3[2] = x[ 3*n+2 ];
 
 // float normal[3];      // these 12 numbers are little endian !!!!!
-      sf->triangles[mm].normal[0] = 0.0;
-      sf->triangles[mm].normal[1] = 0.0;
-      sf->triangles[mm].normal[2] = 0.0;
+      dx1[0] = sf->triangles[mm].vertex2[0] - sf->triangles[mm].vertex1[0];
+      dx1[1] = sf->triangles[mm].vertex2[1] - sf->triangles[mm].vertex1[1];
+      dx1[2] = sf->triangles[mm].vertex2[2] - sf->triangles[mm].vertex1[2];
+      dx2[0] = sf->triangles[mm].vertex3[0] - sf->triangles[mm].vertex1[0];
+      dx2[1] = sf->triangles[mm].vertex3[1] - sf->triangles[mm].vertex1[1];
+      dx2[2] = sf->triangles[mm].vertex3[2] - sf->triangles[mm].vertex1[2];
+      dx[0] =  dx1[1]*dx2[2] - dx1[2]*dx2[1];
+      dx[1] = -dx1[0]*dx2[2] + dx1[2]*dx2[0];
+      dx[2] =  dx1[0]*dx2[1] - dx1[1]*dx2[0];
+      dd = sqrt( dx[0]*dx[0] + dx[1]*dx[1] + dx[2]*dx[2] );
+      sf->triangles[mm].normal[0] = dx[0]/dd;
+      sf->triangles[mm].normal[1] = dx[1]/dd;
+      sf->triangles[mm].normal[2] = dx[2]/dd;
 
       mm += 1;
 
-      n = m*4+2;
+      n = m*4+3;
       n = icon[n]-1;
       sf->triangles[mm].vertex1[0] = x[ 3*n+0 ];
       sf->triangles[mm].vertex1[1] = x[ 3*n+1 ];
@@ -192,16 +202,26 @@ int main( int argc, char *argv[] )
       sf->triangles[mm].vertex2[1] = x[ 3*n+1 ];
       sf->triangles[mm].vertex2[2] = x[ 3*n+2 ];
 
-      n = m*4+3;
+      n = m*4+2;
       n = icon[n]-1;
       sf->triangles[mm].vertex3[0] = x[ 3*n+0 ];
       sf->triangles[mm].vertex3[1] = x[ 3*n+1 ];
       sf->triangles[mm].vertex3[2] = x[ 3*n+2 ];
 
 // float normal[3];      // these 12 numbers are little endian !!!!!
-      sf->triangles[mm].normal[0] = 0.0;
-      sf->triangles[mm].normal[1] = 0.0;
-      sf->triangles[mm].normal[2] = 0.0;
+      dx1[0] = sf->triangles[mm].vertex2[0] - sf->triangles[mm].vertex1[0];
+      dx1[1] = sf->triangles[mm].vertex2[1] - sf->triangles[mm].vertex1[1];
+      dx1[2] = sf->triangles[mm].vertex2[2] - sf->triangles[mm].vertex1[2];
+      dx2[0] = sf->triangles[mm].vertex3[0] - sf->triangles[mm].vertex1[0];
+      dx2[1] = sf->triangles[mm].vertex3[1] - sf->triangles[mm].vertex1[1];
+      dx2[2] = sf->triangles[mm].vertex3[2] - sf->triangles[mm].vertex1[2];
+      dx[0] =  dx1[1]*dx2[2] - dx1[2]*dx2[1];
+      dx[1] = -dx1[0]*dx2[2] + dx1[2]*dx2[0];
+      dx[2] =  dx1[0]*dx2[1] - dx1[1]*dx2[0];
+      dd = sqrt( dx[0]*dx[0] + dx[1]*dx[1] + dx[2]*dx[2] );
+      sf->triangles[mm].normal[0] = dx[0]/dd;
+      sf->triangles[mm].normal[1] = dx[1]/dd;
+      sf->triangles[mm].normal[2] = dx[2]/dd;
    }
 
    printf(" Writing file \n");
