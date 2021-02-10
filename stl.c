@@ -403,6 +403,62 @@ int inSTL_DumpAsciiSTL(char *filename, struct my_STLfile *sp)
 }
 #undef FUNC
 
+/*
+ * Function to dump a TecPlot file
+ */
+
+int inSTL_DumpAsciiSTLTecplot(char *filename, struct my_STLfile *sp)
+#define FUNC "inSTL_DumpAsciiSTLTecplot"
+{
+   FILE *fp;
+   unsigned int n;
+
+
+   fp = fopen(filename,"w");
+   if(fp == NULL) {
+      fprintf(stderr," e [%s]  Could not write file: \"%s\"\n",FUNC,filename);
+      return(1);
+   } else {
+      fprintf(stderr," i [%s]  Writing file: \"%s\"\n",FUNC,filename);
+   }
+
+   fprintf(fp,"variables = x y z nx ny nz \n");
+   fprintf(fp,"ZONE NODES=%d, ELEMENTS=%d, ",sp->ntri*3, sp->ntri);
+   fprintf(fp,"     ZONETYPE=FETRIANGLE, DATAPACKING=POINT \n");
+
+   for(n=0;n<sp->ntri;++n) {
+      fprintf(fp," %f  %f  %f   %lf %lf %lf \n",
+           sp->triangles[n].vertex1[0],
+           sp->triangles[n].vertex1[1],
+           sp->triangles[n].vertex1[2],
+           sp->triangles[n].normal[0],
+           sp->triangles[n].normal[1],
+           sp->triangles[n].normal[2] );
+      fprintf(fp," %f  %f  %f   %lf %lf %lf \n",
+           sp->triangles[n].vertex2[0],
+           sp->triangles[n].vertex2[1],
+           sp->triangles[n].vertex2[2],
+           sp->triangles[n].normal[0],
+           sp->triangles[n].normal[1],
+           sp->triangles[n].normal[2] );
+      fprintf(fp," %f  %f  %f   %lf %lf %lf \n",
+           sp->triangles[n].vertex3[0],
+           sp->triangles[n].vertex3[1],
+           sp->triangles[n].vertex3[2],
+           sp->triangles[n].normal[0],
+           sp->triangles[n].normal[1],
+           sp->triangles[n].normal[2] );
+   }
+   for(n=0;n<sp->ntri;++n) {
+      fprintf(fp," %d %d %d \n", n*3+1, n*3+2, n*3+3 );
+   }
+
+   fclose(fp);
+
+   return(0);
+}
+#undef FUNC
+
 
 /*
 int main() {
