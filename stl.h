@@ -4,11 +4,11 @@
  *  http://en.wikipedia.org/wiki/STL_(file_format)                       *
  *                                                                       *
  *  Ioannis Nompelis <nompelis@nobelware.com>         Created: 20130604  *
- *  Ioannis Nompelis <nompelis@nobelware.com>   Last modified: 20180420  *
+ *  Ioannis Nompelis <nompelis@nobelware.com>   Last modified: 20230117  *
  *************************************************************************/
 
 /******************************************************************************
- Copyright (c) 2013-2018, Ioannis Nompelis
+ Copyright (c) 2013-2023, Ioannis Nompelis
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without any
@@ -40,7 +40,7 @@
  ******************************************************************************/
 
 
-struct my_STLtri {
+struct inSTLtri_s {
    float normal[3];      // these 12 numbers are little endian !!!!!
    float vertex1[3];     // this fact is not stated in STL documentaion
    float vertex2[3];     // according to wikipedia
@@ -48,9 +48,9 @@ struct my_STLtri {
    unsigned short iatrib;
 };
 
-struct my_STLfile {
+struct inSTL_s {
    char header[80];
    unsigned int ntri;
-   struct my_STLtri *triangles;
+   struct inSTLtri_s *triangles;
 };
 

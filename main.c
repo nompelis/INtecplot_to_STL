@@ -7,11 +7,11 @@
  The code makes use of some utilities that are in a small library that I am
  building in order to handle STL files. Treat this as a "pre-release" then.
 
-  Ioannis Nompelis <nompelis@nobelware.com>   Last modified: 20210129
+  Ioannis Nompelis <nompelis@nobelware.com>   Last modified: 20230117
  ***************************************************************************/
 
 /******************************************************************************
- Copyright (c) 2013-2021, Ioannis Nompelis
+ Copyright (c) 2013-2023, Ioannis Nompelis
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without any
@@ -52,6 +52,8 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include <pthread.h>
+
+#include <math.h>
 
 #include "stl.h"
 
@@ -132,7 +134,7 @@ int read_file( char *filename, int *nn, int *ne, int **icon, double **x )
 
 int main( int argc, char *argv[] )
 {
-   struct my_STLfile *sf;
+   struct inSTL_s *sf;
    int nn,ne,*icon;
    double *x;
    int n,m;
@@ -145,11 +147,11 @@ int main( int argc, char *argv[] )
 
    (void) read_file( argv[1], &nn, &ne, &icon, &x );
 
-   sf = (struct my_STLfile *) malloc(sizeof(struct my_STLfile));
+   sf = (struct inSTL_s *) malloc(sizeof(struct inSTL_s));
 
    sf->ntri = 2*ne;
-   sf-> triangles = (struct my_STLtri *)
-              malloc(((size_t) ne*2)*sizeof(struct my_STLtri));
+   sf-> triangles = (struct inSTLtri_s *)
+              malloc(((size_t) ne*2)*sizeof(struct inSTLtri_s));
 
    for(m=0;m<ne;++m) {
       int mm = m*2;
