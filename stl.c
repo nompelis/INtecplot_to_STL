@@ -56,7 +56,7 @@
 // Function to initialize an STL file-data structure
 //
 
-void inSTL_InitSTLfile(struct inSTL_s *sp)
+void inSTL_InitSTLfile( struct inSTL_s *sp )
 {
     memset( sp->header, '\0', 80 );
     sp->ntri = 0;
@@ -75,7 +75,6 @@ int inSTL_ProbeSTLfile( char *filename, int *itype )
    char data[2*80];
    int i;
 
-
    handle = open( filename, O_RDONLY );
    if( handle == -1 ) {
       fprintf( stderr," e [%s]  Failed to open file \"%s\" for reading\n",
@@ -83,16 +82,16 @@ int inSTL_ProbeSTLfile( char *filename, int *itype )
       return 1;
    }
 
-   ierr = read( handle, data, 80 );
+   ierr = (int) read( handle, data, 80 );
    if( ierr < 80 ) {
-      fprintf(stderr," e [%s]  Could not read header (truncated?) \n", FUNC );
+      fprintf( stderr, " e [%s]  Could not read header (truncated?) \n", FUNC );
       close( handle );
       return 2;
    }
 
    // see if it is an STL file by checking the header
-   if( strncmp(data,"solid ", 6) != 0 &&
-       strncmp(data," solid ",7 ) != 0 ) {
+   if( strncmp(data, "solid ", 6 ) != 0 &&
+       strncmp(data, " solid ",7 ) != 0 ) {
       fprintf( stderr," e [%s]  Not an STL file\n", FUNC );
       close( handle );
       return 3;
@@ -101,7 +100,7 @@ int inSTL_ProbeSTLfile( char *filename, int *itype )
       for(i=80;i<2*80;++i) {
          if( data[i] == '\n' ) data[i] = '\0';
       }
-      fprintf( stdout," i [%s]  File header: \"%s\" \n", FUNC, &(data[80]) );
+      fprintf( stdout, " i [%s]  File header: \"%s\" \n", FUNC, &(data[80]) );
    }
 
    // see if it is an ASCII file by running through the first few bytes
@@ -138,13 +137,13 @@ int inSTL_ReadBinarySTL( char *filename, struct inSTL_s *sp, size_t isize )
 
 
    handle = open( filename, O_RDONLY );
-   if(handle == -1) {
+   if( handle == -1 ) {
       fprintf( stderr," e [%s]  Failed to open file \"%s\" for reading\n",
                FUNC,filename);
       return 1;
    }
 
-   ierr = read( handle, sp->header, 80 );
+   ierr = (int) read( handle, sp->header, 80 );
    if( ierr < 80 ) {
       fprintf( stderr," e [%s]  Could not read header of file\n", FUNC );
       close( handle );
@@ -161,7 +160,6 @@ int inSTL_ReadBinarySTL( char *filename, struct inSTL_s *sp, size_t isize )
       fprintf( stderr, " i [%s]  File has %d triangles \n", FUNC, sp->ntri );
    }
 
-
    sp->triangles = (struct inSTLtri_s *)
              malloc( ((size_t) sp->ntri) * sizeof(struct inSTLtri_s) );
    if( sp->triangles == NULL ) {
@@ -172,7 +170,6 @@ int inSTL_ReadBinarySTL( char *filename, struct inSTL_s *sp, size_t isize )
 
    for(n=0;n<sp->ntri;++n) {
       ierr = (int) read( handle, &(sp->triangles[n]), isize );
-
       if( ierr < (int) isize ) {
          fprintf( stderr," e [%s]  Failed to read all triangles; (truncated?) \n",FUNC);
          close( handle );
@@ -203,10 +200,10 @@ sp->triangles[n].vertex3[2]
 );
 */
 
-
    }
 
    close( handle );
+
    return 0;
 }
 #undef FUNC
@@ -237,7 +234,7 @@ int inSTL_ReadAsciiSTL( char *filename, struct inSTL_s *sp )
    fgets( data, 100, fp );
    ic = sscanf( data, "solid %s", name );
    if( ic != 1 ) {
-      fprintf( stderr," e [%s]  Could not find a valid STL header\n", FUNC );
+      fprintf( stderr, " e [%s]  Could not find a valid STL header\n", FUNC );
       fclose( fp );
       return 2;
    }
@@ -249,9 +246,13 @@ int inSTL_ReadAsciiSTL( char *filename, struct inSTL_s *sp )
    while( iend == 0 ) {
       if( !feof( fp ) ) {
          fgets( data, 100, fp );
-//printf("READ FROM FILE: %s",data);
-         if( strstr(data, "endsolid" ) != NULL ) {
-         // fprintf(stderr," i [%s]  Found \"endsolid\" in file\n",FUNC);
+#ifdef _DEBUG_
+         fprintf( stdout, " Read: %s", data );
+#endif
+         if( strstr( data, "endsolid" ) != NULL ) {
+#ifdef _DEBUG_
+            fprintf( stderr," i [%s]  Found \"endsolid\" in file\n", FUNC );
+#endif
             iend = 1;
          }
 
@@ -276,22 +277,18 @@ int inSTL_ReadAsciiSTL( char *filename, struct inSTL_s *sp )
             n = n + 1;
          }
 
-//printf("itri=', %i\n",itri);  //HACK
       } else {
          iend = -1;
       }
    }
 
-
    if( iend == -1 && itri == 0 ) {
-       fprintf( stderr," e [%s]  File seems to be truncated\n", FUNC );
+       fprintf( stderr, " e [%s]  File seems to be truncated\n", FUNC );
        fclose( fp );
        return 3;
    }
-
-
    if( iend == 1 && itri == 0 ) {
-       fprintf( stderr," i [%s]  Counted %i triangles \n", FUNC, n );
+       fprintf( stderr, " i [%s]  Counted %i triangles \n", FUNC, n );
    }
 
    // creating storage for all triangles
@@ -299,7 +296,7 @@ int inSTL_ReadAsciiSTL( char *filename, struct inSTL_s *sp )
    sp->triangles = (struct inSTLtri_s *)
              malloc( ((size_t) sp->ntri) * sizeof(struct inSTLtri_s) );
    if( sp->triangles == NULL ) {
-      fprintf( stderr," e [%s]  Could not allocate space for triangles \n", FUNC );
+      fprintf( stderr, " e [%s]  Could not allocate space for triangles \n", FUNC );
       fclose( fp );
       return 2;
    }
@@ -311,7 +308,7 @@ int inSTL_ReadAsciiSTL( char *filename, struct inSTL_s *sp )
       struct inSTLtri_s *tp = &(sp->triangles[n]);
 
       fgets( data, 100, fp );
-      sscanf(data," facet normal %f %f %f",
+      sscanf(data, " facet normal %f %f %f",
         &(tp->normal[0]),
         &(tp->normal[1]),
         &(tp->normal[2]) );
@@ -347,7 +344,6 @@ int inSTL_ReadAsciiSTL( char *filename, struct inSTL_s *sp )
 #undef FUNC
 
 
-
 //
 // Function to dump an STL file
 //
@@ -361,10 +357,10 @@ int inSTL_DumpAsciiSTL( char *filename, struct inSTL_s *sp )
 
    fp = fopen( filename, "w" );
    if( fp == NULL ) {
-      fprintf( stderr," e [%s]  Could not write file: \"%s\"\n", FUNC,filename);
+      fprintf( stderr, " e [%s]  Could not write file: \"%s\"\n",FUNC,filename);
       return 1;
    } else {
-      fprintf( stderr," i [%s]  Writing file: \"%s\"\n", FUNC, filename );
+      fprintf( stderr, " i [%s]  Writing file: \"%s\"\n", FUNC, filename );
    }
 
    fprintf( fp, "solid ASCII_STL_by_IN (%d triangles) \n",sp->ntri );
@@ -409,34 +405,34 @@ int inSTL_DumpAsciiSTLTecplot(char *filename, struct inSTL_s *sp)
    unsigned int n;
 
 
-   fp = fopen(filename,"w");
-   if(fp == NULL) {
-      fprintf(stderr," e [%s]  Could not write file: \"%s\"\n",FUNC,filename);
-      return(1);
+   fp = fopen( filename, "w" );
+   if( fp == NULL ) {
+      fprintf( stderr, " e [%s]  Could not write file: \"%s\"\n",FUNC,filename);
+      return 1;
    } else {
-      fprintf(stderr," i [%s]  Writing file: \"%s\"\n",FUNC,filename);
+      fprintf( stderr, " i [%s]  Writing file: \"%s\"\n", FUNC, filename );
    }
 
-   fprintf(fp,"variables = x y z nx ny nz \n");
-   fprintf(fp,"ZONE NODES=%d, ELEMENTS=%d, ",sp->ntri*3, sp->ntri);
-   fprintf(fp,"     ZONETYPE=FETRIANGLE, DATAPACKING=POINT \n");
+   fprintf( fp, "variables = x y z nx ny nz \n" );
+   fprintf( fp, "ZONE NODES=%d, ELEMENTS=%d, ",sp->ntri*3, sp->ntri );
+   fprintf( fp, "     ZONETYPE=FETRIANGLE, DATAPACKING=POINT \n" );
 
    for(n=0;n<sp->ntri;++n) {
-      fprintf(fp," %f  %f  %f   %lf %lf %lf \n",
+      fprintf( fp, " %f  %f  %f   %lf %lf %lf \n",
            sp->triangles[n].vertex1[0],
            sp->triangles[n].vertex1[1],
            sp->triangles[n].vertex1[2],
            sp->triangles[n].normal[0],
            sp->triangles[n].normal[1],
            sp->triangles[n].normal[2] );
-      fprintf(fp," %f  %f  %f   %lf %lf %lf \n",
+      fprintf( fp, " %f  %f  %f   %lf %lf %lf \n",
            sp->triangles[n].vertex2[0],
            sp->triangles[n].vertex2[1],
            sp->triangles[n].vertex2[2],
            sp->triangles[n].normal[0],
            sp->triangles[n].normal[1],
            sp->triangles[n].normal[2] );
-      fprintf(fp," %f  %f  %f   %lf %lf %lf \n",
+      fprintf( fp, " %f  %f  %f   %lf %lf %lf \n",
            sp->triangles[n].vertex3[0],
            sp->triangles[n].vertex3[1],
            sp->triangles[n].vertex3[2],
@@ -445,12 +441,12 @@ int inSTL_DumpAsciiSTLTecplot(char *filename, struct inSTL_s *sp)
            sp->triangles[n].normal[2] );
    }
    for(n=0;n<sp->ntri;++n) {
-      fprintf(fp," %d %d %d \n", n*3+1, n*3+2, n*3+3 );
+      fprintf( fp, " %d %d %d \n", n*3+1, n*3+2, n*3+3 );
    }
 
-   fclose(fp);
+   fclose( fp );
 
-   return(0);
+   return 0;
 }
 #undef FUNC
 
@@ -471,5 +467,4 @@ int main() {
    return 0;
 }
 #endif
-
 
